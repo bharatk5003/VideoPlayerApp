@@ -59,5 +59,32 @@ userSchema.pre("save", async function(next){
 userSchema.methods.isPasswordCorrect = async function(password){
    return await bcrypt.compare(password,this.password);
 }
+userSchema.method.generateAccessToken = async function(){
+      const jwtPayload ={
+         _id : this._id,
+         email: this.email,
+         username: this.username
+      }
+   return   jwt.sign(
+            jwtPayload,
+            process.env.ACCESS_TOKEN_SECRET,{
+         expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+      })
+
+
+}
+
+userSchema.method.generateRefreshToken = async function(){
+   const jwtPayload={
+      _id: this._id,
+   }
+   return jwt.sign(
+      jwtPayload,
+      process.env.REFRESH_TOKEN_EXPIRY,
+      {
+        expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+      }
+   )
+}
 
 export const User = mongoose.model('user',userSchema);
