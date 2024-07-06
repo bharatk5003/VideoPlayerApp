@@ -7,15 +7,15 @@ import { ApiResponse } from "../utils/apiResponse.js";
 
 export const registerUser = asyncHandler ( async (req,res)=>{
     // get user info from client
-    const {fullName,email,username,password}=req.body;
+    const {fullname,email,username,password}=req.body;
     // console.table([fullName,username,email,password]);
-    if(fullName===""){
+    if(fullname===""){
         throw new APIError(400,"full name is required")
     }
 
-  const existedUser= await User.findOne({
-        $or:[{username},{email}]
-    })
+  const existedUser = await User.findOne({
+    $or: [{ username }, { email }],
+  });
     if(existedUser){
         throw new APIError(409,"user already existing")
     }
@@ -29,12 +29,12 @@ export const registerUser = asyncHandler ( async (req,res)=>{
     const avatar=await uploadOnCloudinary(avatarLocalPath);
     const coverImage= await uploadOnCloudinary(coverImageLocalPath);
     //check if user already exist(validation)
-    if(avatar){
+    if(!avatar){
         throw new APIError(400,"Avatar upload failed");
     }
 
     const user=await User.create({
-        fullName,
+        fullname,
         avatar: avatar.url,
         coverImage: coverImage?.url || "",
         email,
