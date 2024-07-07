@@ -135,8 +135,8 @@ export const logoutUser = asyncHandler( async(req,res)=>{
      await User.findByIdAndUpdate(
        req.user._id,
        {
-         $set: {
-           refreshToken: undefined,
+         $unset: {
+           refreshToken: 1,
          },
        },
        {
@@ -159,5 +159,25 @@ export const logoutUser = asyncHandler( async(req,res)=>{
 })
 
 export const refreshAccessToken = asyncHandler( async(req,res)=>{
-    const incomingRefreshToken = req.cookies.re
+    const getIncomingToken =req.cookie?.accessToken
+})
+
+export const changeCurrentPassword = asyncHandler( async(req,res)=>{
+    const {oldPassword ,newPassword}=req.body;
+    const user= await User.findById(req.user?._id);
+    const isPasswordValid= await user.isPasswordCorrect(oldPassword);
+    if(!isPasswordValid){
+        throw new APIError(400,"oldpassword is invalid");
+    }
+    user.password=newPassword;
+    await user.save({validateBeforeSave: false})
+
+    return res
+            .status(200)
+            .json(new ApiResponse(200,{},"password changed successfully"));
+})
+
+export const getCurrentUser = asyncHandler(async(req,res)=>{
+    return res.status(200)
+              .json(new ApiResponse(200,req.user,"current user fetched successfully"));
 })
